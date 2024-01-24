@@ -52,6 +52,20 @@ resource "aws_s3_bucket_public_access_block" "bucket_access_block" {
   block_public_policy = false
 }
 
+resource "aws_s3_bucket_ownership_controls" "s3_bucket_acl_ownership" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+  depends_on = [ aws_s3_bucket_public_access_block.bucket_access_block ]
+}
+
+resource "aws_s3_bucket_acl" "bucket_acl" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+  acl    = "private"
+  depends_on = [ aws_s3_bucket_ownership_controls.s3_bucket_acl_ownership ]
+}
+
 resource "aws_s3_bucket_policy" "bucket_policy" {
   bucket = aws_s3_bucket.frontend_bucket.id
 

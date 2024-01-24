@@ -1,1 +1,25 @@
 # TO-DO: Write code to upload ammended files as objects to S3 bucket on push to main
+
+name: Upload object to S3
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  AWS_REGION: us-east-2                   # set this to your preferred AWS region, e.g. us-west-1
+
+jobs:
+    upload:
+        name: Upload S3 object
+        runs-on: ubuntu-latest
+
+        steps:
+        - uses: actions/checkout@master
+        - uses: shallwefootball/s3-upload-action@master
+          with:
+              aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws-region: ${{ env.AWS_REGION }}
+              aws_bucket: "cde-exercise-tracker-frontend"
+              source_dir: 'index.html'
