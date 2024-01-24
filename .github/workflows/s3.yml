@@ -19,6 +19,6 @@ jobs:
         - uses: shallwefootball/s3-upload-action@master
           with:
               aws_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-              aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+              aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
               aws_bucket: "cde-exercise-tracker-frontend"
               source_dir: 'index.html'
