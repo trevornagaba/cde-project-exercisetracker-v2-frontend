@@ -1,0 +1,74 @@
+# S3 build guide >>> https://github.com/fang-lin/function-plotter/blob/master/terraform/main.tf
+
+resource "aws_s3_bucket" "frontend_bucket" {
+  bucket = var.bucket_name
+}
+
+# data "archive_file" "source-code-zip" {
+#   type = "zip"
+#   source_file = "./public"
+#   output_path = ".public.zip"
+# }
+
+resource "aws_s3_object" "index_html" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+  key    = "index.html"
+  source = "./index.html"
+  content_type = "text/html"
+
+  # The filemd5() function is available in Terraform 0.11.12 and later
+  # For Terraform 0.11.11 and earlier, use the md5() function and the file() function:
+  # etag = "${md5(file("path/to/file"))}"
+  # etag = filemd5("../index.html")
+}
+
+resource "aws_s3_object" "style_css" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+  key    = "style.css"
+  source = "./style.css"
+
+#   # The filemd5() function is available in Terraform 0.11.12 and later
+#   # For Terraform 0.11.11 and earlier, use the md5() function and the file() function:
+#   # etag = "${md5(file("path/to/file"))}"
+#   etag = filemd5("../public/")
+}
+
+resource "aws_s3_bucket_website_configuration" "frontend_bucket" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+#   error_document {
+#     key = "404.html"
+#   }
+}
+
+resource "aws_s3_bucket_public_access_block" "bucket_access_block" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+
+  block_public_acls   = false
+  block_public_policy = false
+}
+
+resource "aws_s3_bucket_policy" "bucket_policy" {
+  bucket = aws_s3_bucket.frontend_bucket.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid: "PublicReadGetObject"
+        Effect    = "Allow"
+        Principal = "*"
+        Action = [
+          "s3:GetObject"
+        ]
+        Resource = [
+          "${aws_s3_bucket.frontend_bucket.arn}/*"
+        ]
+      }
+    ]
+  })
+}
